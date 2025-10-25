@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { InventoryItemCard } from "@/components/InventoryItemCard";
-import { Package, Plus, LogOut, MessageSquare, Search, Loader2 } from "lucide-react";
+import { Package, Plus, LogOut, MessageSquare, Search } from "lucide-react";
 
 const Dashboard = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -63,92 +63,95 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card shadow-sm sticky top-0 z-10"
-              style={{ background: 'var(--gradient-header)' }}>
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Package className="h-6 w-6 text-primary" />
-              <h1 className="text-2xl font-bold">Inventory AI</h1>
+    <div className="min-h-screen bg-background pb-20">
+      {/* Header con gradiente */}
+      <header className="bg-gradient-to-br from-primary via-primary to-primary-dark text-primary-foreground sticky top-0 z-10 shadow-xl shadow-primary/20">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                <Package className="h-6 w-6" />
+              </div>
+              <h1 className="text-2xl font-bold">Mi Inventario</h1>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex gap-2">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
                 onClick={() => navigate("/chat")}
+                className="text-primary-foreground hover:bg-white/20"
               >
-                <MessageSquare className="h-4 w-4" />
+                <MessageSquare className="h-5 w-5" />
               </Button>
-              <Button
-                variant="outline"
-                size="icon"
+              <Button 
+                variant="ghost" 
+                size="icon" 
                 onClick={handleLogout}
+                className="text-primary-foreground hover:bg-white/20"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-5 w-5" />
               </Button>
             </div>
+          </div>
+
+          {/* Barra de búsqueda */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              placeholder="Buscar artículo..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-12 h-12 bg-white/95 backdrop-blur-sm border-0 shadow-lg text-base"
+            />
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-card p-6 rounded-lg shadow-[var(--shadow-card)]">
-            <p className="text-sm text-muted-foreground">Total Items</p>
-            <p className="text-3xl font-bold text-primary">{stats.total}</p>
+      {/* Stats Cards */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-gradient-to-br from-card to-card/80 p-4 rounded-2xl shadow-[var(--shadow-card)] border border-border/50">
+            <p className="text-xs text-muted-foreground font-medium mb-1">Total</p>
+            <p className="text-2xl font-bold text-primary">{stats.total}</p>
           </div>
-          <div className="bg-card p-6 rounded-lg shadow-[var(--shadow-card)]">
-            <p className="text-sm text-muted-foreground">Stock Bajo</p>
-            <p className="text-3xl font-bold text-secondary">{stats.lowStock}</p>
+          <div className="bg-gradient-to-br from-card to-card/80 p-4 rounded-2xl shadow-[var(--shadow-card)] border border-border/50">
+            <p className="text-xs text-muted-foreground font-medium mb-1">Bajo</p>
+            <p className="text-2xl font-bold text-secondary">{stats.lowStock}</p>
           </div>
-          <div className="bg-card p-6 rounded-lg shadow-[var(--shadow-card)]">
-            <p className="text-sm text-muted-foreground">Sin Stock</p>
-            <p className="text-3xl font-bold text-destructive">{stats.outOfStock}</p>
+          <div className="bg-gradient-to-br from-card to-card/80 p-4 rounded-2xl shadow-[var(--shadow-card)] border border-border/50">
+            <p className="text-xs text-muted-foreground font-medium mb-1">Agotado</p>
+            <p className="text-2xl font-bold text-destructive">{stats.outOfStock}</p>
           </div>
-        </div>
-
-        {/* Search and Add */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nombre o SKU..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Button onClick={() => navigate("/add-item")}>
-            <Plus className="mr-2 h-4 w-4" />
-            Agregar Item
-          </Button>
         </div>
 
         {/* Items Grid */}
         {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="text-center py-20">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+            <p className="mt-4 text-muted-foreground">Cargando inventario...</p>
           </div>
         ) : filteredItems.length === 0 ? (
-          <div className="text-center py-12">
-            <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No hay items en el inventario</h3>
-            <p className="text-muted-foreground mb-4">
-              {search ? "No se encontraron resultados para tu búsqueda." : "Comienza agregando tu primer item."}
+          <div className="text-center py-20">
+            <div className="p-6 bg-gradient-to-br from-muted to-muted/50 rounded-3xl inline-block mb-4">
+              <Package className="h-16 w-16 text-muted-foreground" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">
+              {search ? "Sin resultados" : "Inventario vacío"}
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              {search
+                ? "No encontramos artículos con ese nombre"
+                : "¡Comienza agregando tu primer artículo!"}
             </p>
             {!search && (
-              <Button onClick={() => navigate("/add-item")}>
-                <Plus className="mr-2 h-4 w-4" />
-                Agregar Primer Item
+              <Button onClick={() => navigate("/add-item")} size="lg">
+                <Plus className="h-5 w-5 mr-2" />
+                Agregar artículo
               </Button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 animate-fade-in">
             {filteredItems.map((item) => (
               <InventoryItemCard
                 key={item.id}
@@ -158,7 +161,18 @@ const Dashboard = () => {
             ))}
           </div>
         )}
-      </main>
+      </div>
+
+      {/* Botón flotante para agregar */}
+      <div className="fixed bottom-6 right-6 z-20">
+        <Button
+          onClick={() => navigate("/add-item")}
+          size="lg"
+          className="h-16 w-16 rounded-full shadow-2xl shadow-primary/40 hover:shadow-primary/60"
+        >
+          <Plus className="h-8 w-8" />
+        </Button>
+      </div>
     </div>
   );
 };
