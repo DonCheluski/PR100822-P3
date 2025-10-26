@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Package, Mail, Loader2, KeyRound } from "lucide-react";
+import { Package, Mail, Loader2, KeyRound, Lock } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
@@ -38,24 +39,49 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: !isLogin,
-        }
-      });
-      
-      if (error) throw error;
+      if (isLogin) {
+        // Para login: primero intentamos autenticar, luego enviamos OTP
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (error) throw error;
+        
+        // Después de autenticar exitosamente, enviamos OTP para verificación adicional
+        const { error: otpError } = await supabase.auth.signOut();
+        if (otpError) throw otpError;
+        
+        const { error: sendError } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            shouldCreateUser: false,
+          }
+        });
+        
+        if (sendError) throw sendError;
+      } else {
+        // Para registro: creamos cuenta y enviamos OTP
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+          }
+        });
+        
+        if (error) throw error;
+      }
       
       setOtpSent(true);
       toast({
         title: "¡Código enviado!",
-        description: `Revisa tu correo ${email} para obtener el código OTP.`,
+        description: `Revisa tu correo ${email} para obtener el código de verificación.`,
       });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "No se pudo enviar el código. Intenta de nuevo.",
+        description: error.message || "Ocurrió un error. Intenta de nuevo.",
         variant: "destructive",
       });
     } finally {
@@ -94,6 +120,7 @@ const Auth = () => {
   const handleBack = () => {
     setOtpSent(false);
     setOtp("");
+    setPassword("");
   };
 
   return (
@@ -135,10 +162,22 @@ const Auth = () => {
                     required
                   />
                 </div>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    type="password"
+                    placeholder="Contraseña"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-12 h-12 text-base"
+                    required
+                    minLength={6}
+                  />
+                </div>
               </div>
               <Button type="submit" className="w-full h-12 text-base" disabled={loading} size="lg">
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Enviar código OTP
+                {isLogin ? "Continuar" : "Crear cuenta"}
               </Button>
               <Button
                 type="button"
