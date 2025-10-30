@@ -40,33 +40,32 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        // Para login: primero intentamos autenticar, luego enviamos OTP
-        const { error } = await supabase.auth.signInWithPassword({
+        // Para login: validar contraseña y enviar OTP
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         
-        if (error) throw error;
+        if (signInError) throw signInError;
         
-        // Después de autenticar exitosamente, enviamos OTP para verificación adicional
-        const { error: otpError } = await supabase.auth.signOut();
-        if (otpError) throw otpError;
+        // Cerrar sesión temporal y solicitar OTP para verificación
+        await supabase.auth.signOut();
         
-        const { error: sendError } = await supabase.auth.signInWithOtp({
+        const { error: otpError } = await supabase.auth.signInWithOtp({
           email,
           options: {
             shouldCreateUser: false,
           }
         });
         
-        if (sendError) throw sendError;
+        if (otpError) throw otpError;
       } else {
-        // Para registro: creamos cuenta y enviamos OTP
+        // Para registro: crear cuenta con contraseña (esto enviará automáticamente el OTP)
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/`,
+            emailRedirectTo: `${window.location.origin}/dashboard`,
           }
         });
         
