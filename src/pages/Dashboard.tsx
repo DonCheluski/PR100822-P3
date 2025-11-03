@@ -96,12 +96,12 @@ const Dashboard = () => {
 
           {/* Barra de búsqueda */}
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/60" />
             <Input
               placeholder="Buscar artículo..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-12 h-12 bg-white/95 backdrop-blur-sm border-0 shadow-lg text-base"
+              className="pl-12 h-12 bg-white/95 backdrop-blur-sm border-0 shadow-lg text-base text-foreground placeholder:text-muted-foreground"
             />
           </div>
         </div>

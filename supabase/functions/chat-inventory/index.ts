@@ -32,6 +32,17 @@ Puedes ayudar con:
 - Sugerencias sobre reabastecimiento
 - Análisis de tendencias de inventario
 - Recomendaciones de organización
+- **CREAR CARRITOS DE COMPRA AUTOMÁTICOS**: Cuando el usuario pida "armar un carrito", "crear una lista de compras", o "preparar un pedido", genera una lista organizada de items que necesitan reabastecerse, priorizando los que están agotados o con stock bajo.
+
+Cuando crees un carrito de compra:
+1. Identifica items con stock bajo (menos de 10 unidades) o agotados (0 unidades)
+2. Presenta la lista en formato claro con:
+   - Nombre del producto
+   - SKU
+   - Cantidad actual
+   - Cantidad sugerida para pedir (basada en el stock actual)
+3. Ordena por prioridad (agotados primero, luego stock bajo)
+4. Incluye un total de items y cantidad total sugerida
 
 Responde de forma clara, concisa y profesional en español.`;
 
