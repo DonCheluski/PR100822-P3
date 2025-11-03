@@ -5,15 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Package, Mail, Loader2, KeyRound, Lock } from "lucide-react";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { Package, Mail, Loader2, Lock } from "lucide-react";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("usuario@ejemplo.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [otpSent, setOtpSent] = useState(true);
-  const [otp, setOtp] = useState("145678");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -34,33 +31,24 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleSendOtp = async (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       if (isLogin) {
-        // Para login: validar contraseña y enviar OTP
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         
-        if (signInError) throw signInError;
+        if (error) throw error;
         
-        // Cerrar sesión temporal y solicitar OTP para verificación
-        await supabase.auth.signOut();
-        
-        const { error: otpError } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            shouldCreateUser: false,
-          }
+        toast({
+          title: "¡Bienvenido!",
+          description: "Has iniciado sesión correctamente.",
         });
-        
-        if (otpError) throw otpError;
       } else {
-        // Para registro: crear cuenta con contraseña (esto enviará automáticamente el OTP)
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -70,13 +58,12 @@ const Auth = () => {
         });
         
         if (error) throw error;
+        
+        toast({
+          title: "¡Cuenta creada!",
+          description: "Tu cuenta ha sido creada exitosamente.",
+        });
       }
-      
-      setOtpSent(true);
-      toast({
-        title: "¡Código enviado!",
-        description: `Revisa tu correo ${email} para obtener el código de verificación.`,
-      });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -86,40 +73,6 @@ const Auth = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { error } = await supabase.auth.verifyOtp({
-        email,
-        token: otp,
-        type: 'email'
-      });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "¡Éxito!",
-        description: "Has iniciado sesión correctamente.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Código inválido. Intenta de nuevo.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBack = () => {
-    setOtpSent(false);
-    setOtp("");
-    setPassword("");
   };
 
   return (
@@ -138,104 +91,52 @@ const Auth = () => {
               StockAI
             </CardTitle>
             <p className="text-muted-foreground mt-2">
-              {otpSent 
-                ? "Ingresa el código de verificación" 
-                : isLogin 
-                  ? "Bienvenido de vuelta" 
-                  : "Crea tu cuenta"}
+              {isLogin ? "Bienvenido de vuelta" : "Crea tu cuenta"}
             </p>
           </div>
         </CardHeader>
         <CardContent>
-          {!otpSent ? (
-            <form onSubmit={handleSendOtp} className="space-y-5">
-              <div className="space-y-4">
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-12 h-12 text-base"
-                    required
-                  />
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    type="password"
-                    placeholder="Contraseña"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-12 h-12 text-base"
-                    required
-                    minLength={6}
-                  />
-                </div>
+          <form onSubmit={handleAuth} className="space-y-5">
+            <div className="space-y-4">
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-12 h-12 text-base"
+                  required
+                />
               </div>
-              <Button type="submit" className="w-full h-12 text-base" disabled={loading} size="lg">
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isLogin ? "Continuar" : "Crear cuenta"}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full"
-                onClick={() => setIsLogin(!isLogin)}
-              >
-                {isLogin
-                  ? "¿No tienes cuenta? Regístrate"
-                  : "¿Ya tienes cuenta? Inicia sesión"}
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={handleVerifyOtp} className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex flex-col items-center gap-4">
-                  <KeyRound className="h-12 w-12 text-primary" />
-                  <p className="text-lg font-semibold text-foreground text-center">
-                    Código de inicio de sesión
-                  </p>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Ingresa el código enviado a<br />
-                    <span className="font-semibold text-foreground">{email}</span>
-                  </p>
-                </div>
-                <div className="flex justify-center">
-                  <InputOTP maxLength={6} value={otp} onChange={setOtp}>
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
-                </div>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="password"
+                  placeholder="Contraseña"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-12 h-12 text-base"
+                  required
+                  minLength={6}
+                />
               </div>
-              <div className="space-y-3">
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 text-base" 
-                  disabled={loading || otp.length !== 6} 
-                  size="lg"
-                >
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Verificar código
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="w-full"
-                  onClick={handleBack}
-                >
-                  Volver
-                </Button>
-              </div>
-            </form>
-          )}
+            </div>
+            <Button type="submit" className="w-full h-12 text-base" disabled={loading} size="lg">
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLogin ? "Iniciar sesión" : "Crear cuenta"}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full"
+              onClick={() => setIsLogin(!isLogin)}
+            >
+              {isLogin
+                ? "¿No tienes cuenta? Regístrate"
+                : "¿Ya tienes cuenta? Inicia sesión"}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>
