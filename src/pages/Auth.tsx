@@ -135,7 +135,7 @@ const Auth = () => {
           </div>
           <div>
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              InvenTrack
+              StockAI
             </CardTitle>
             <p className="text-muted-foreground mt-2">
               {otpSent 

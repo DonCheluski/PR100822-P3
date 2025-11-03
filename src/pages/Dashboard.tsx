@@ -72,7 +72,7 @@ const Dashboard = () => {
               <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
                 <Package className="h-6 w-6" />
               </div>
-              <h1 className="text-2xl font-bold">Mi Inventario</h1>
+              <h1 className="text-2xl font-bold">StockAI</h1>
             </div>
             <div className="flex gap-2">
               <Button
