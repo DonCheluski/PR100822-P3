@@ -10,10 +10,10 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("usuario@ejemplo.com");
   const [password, setPassword] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(true);
+  const [otp, setOtp] = useState("145678");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -194,8 +194,11 @@ const Auth = () => {
               <div className="space-y-4">
                 <div className="flex flex-col items-center gap-4">
                   <KeyRound className="h-12 w-12 text-primary" />
+                  <p className="text-lg font-semibold text-foreground text-center">
+                    Código de inicio de sesión
+                  </p>
                   <p className="text-sm text-muted-foreground text-center">
-                    Ingresa el código de 6 dígitos enviado a<br />
+                    Ingresa el código enviado a<br />
                     <span className="font-semibold text-foreground">{email}</span>
                   </p>
                 </div>
